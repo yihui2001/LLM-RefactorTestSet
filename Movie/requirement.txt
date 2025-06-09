@@ -1,0 +1,24 @@
+The purpose of this system is to simulate the rental process, including customer rentals, fee calculation, frequent renter points tracking, and generating rental reports.
+Functional Requirements
+1. Rental Record Management
+Allow adding customer rental records, including customer name, movie title, and rental duration (in days).
+Automatically calculate rental fees and frequent renter points, and save the records.
+2. Report Generation
+Generate a rental report for a specific customer, including:
+Rental duration, fees, and frequent renter points for each movie.
+The total rental fee and the total frequent renter points.
+
+Movie Types and Rental Fee Rules
+1. Regular Movies:
+
+Rental fee for the first 2 days is $2. An additional $1.5 per day is charged after that.
+Each transaction earns 1 frequent renter point.
+2. New Release Movies:
+
+Rental fee is $3 per day.
+Each transaction earns 2 frequent renter points.
+3. Children's Movies:
+
+Rental fee for the first 3 days is $1.5. An additional $1 per day is charged after that.
+Each transaction earns 1 frequent renter point.
+

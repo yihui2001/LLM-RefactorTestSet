@@ -1,0 +1,8 @@
+Order Management System
+This Java program represents a basic structure of an order management system. It models relationships between Customers, Employees, and Orders.
+
+Each order (Order) is linked to: a customer (Customer), a contact person (Employee), a sale price
+
+The program logic demonstrates how to: 1. Create orders 2. Assign a contact person to an order
+
+Note that  a customer always works with the same employee.

@@ -1,0 +1,8 @@
+The SceneFile is a JSON-based configuration that defines Virtual Models (VMs) and their relationships within a scene.
+Add a feature in the Viewer that allows directly loading a SceneFile to facilitate testing. Currently, testing the Viewer requires running the entire process from the beginning to generate a VM within it, making it inconvenient to test Viewer-specific functionalities.
+
+Expected Modifications:
+
+Add an icon in the top-left corner of the Viewer for loading a SceneFile.
+
+Once a SceneFile is  loaded, its VM should be displayed and fully operable within the Viewer.

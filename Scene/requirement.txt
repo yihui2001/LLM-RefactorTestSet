@@ -1,0 +1,13 @@
+This script is primarily designed to load object DLL files dynamically and create corresponding objects in Unity based on external input. It listens for incoming JSON messages via a TCP connection, processes the data, and generates the necessary GameObjects with appropriate components.
+The method GetMeshDll() scans a designated directory for DLL files, loads them using reflection, and maps the vmType names to their corresponding class types. This allows the script to dynamically instantiate objects based on external data.
+When a JSON message is received, ParseJsonAndBuildGameobj() extracts the relevant object attributes, such as vmType and vmId. It then calls RunDll() to create a new GameObject, attach the appropriate component using reflection, and set its attributes. These objects are added to DivaManager, ensuring they can be accessed and updated later.
+The script supports several commands, including:
+
+Visualize: Clears existing objects and creates new ones from the provided JSON data.
+
+Update: Updates attributes of existing objects without recreating them.
+
+Clear: Removes all objects from the scene.
+
+Label: Assigns labels to objects for categorization. These commands allow the system to dynamically manage and modify objects in the scene based on real-time data input.
+

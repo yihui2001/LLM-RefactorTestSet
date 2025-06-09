@@ -1,0 +1,86 @@
+eBook Rental System Requirements
+
+In response to the growing trend of digital reading, Chengpin Bookstore plans to develop an eBook rental system, allowing customers to access content at a lower price without worrying about storage space. Your task is to implement the back-end of this rental system using Java, focusing on recording customer names, rented book titles, rental days, and fees. To build customer loyalty, the bookstore introduces a points system based on book categories. Customers can accumulate points to participate in special events.
+
+For instance, if Customer A rents “The Courage to Be Disliked” for 14 days, the back-end will calculate a rental fee of $70 and award 10 points. When a user checks their rental history, the back-end should return details on all rented books, the cost of each rental, the total amount paid, and the total points accumulated.
+
+Though this system is built with a web-based front-end/back-end architecture, for simulation purposes, the back-end logic should be implemented in Java in the main() function, with rental history displayed via print.
+
+Note: The back-end is only responsible for recording rentals; it does not handle returns (books are automatically removed after expiration).
+
+Use Cases
+
+Use Case A: Create an eBook Class
+	Definition:
+	The system offers three book categories: top10, tech, and mind. When a user selects an eBook for rental, a new rental record is created based on the book's name and type.
+
+	What to Do:
+	Define an eBook class.
+	Categorize eBooks into top10, tech, and mind categories.
+	Create four eBooks with the following titles and categories:
+	top10 – Atomic Habits
+	top10 – ETF Wealth for Millennials
+	tech – Object-Oriented Programming from 0 to 1
+	mind – The Courage to Be Disliked
+
+Use Case B: Create a Customer Class
+	Definition:
+	A customer record is created when a user registers as a member.
+
+	What to Do:
+	Define a Customer class.
+	Create four customers with the following names:
+	Amy
+	Bella
+	Cindy
+	Debby
+Use Case C: Create a Rental Class
+	Definition:
+	Each rental creates a new record containing the book title and rental duration.
+
+	What to Do:
+	Define a Rental class.
+	Create seven rental records as follows:
+	Amy: ETF Wealth for Millennials / 20 days
+	Amy: The Courage to Be Disliked / 9 days
+	Debby: ETF Wealth for Millennials / 15 days
+	Bella: Object-Oriented Programming from 0 to 1 / 25 days
+	Bella: The Courage to Be Disliked / 14 days
+	Cindy: Atomic Habits / 15 days
+	Debby: Atomic Habits / 23 days
+	Note: Since these are digital books, availability constraints do not apply.
+
+Use Case D: Add printHistory() Method in Customer Class
+	Definition:
+	The printHistory() method should print the rental history for a customer.
+
+	What to Do:
+	Implement the printHistory() method in the Customer class.
+	Call printHistory() in main() to print each customer's rental history.
+	Use Case D.1: Calculate Rental Fees in printHistory()
+	Definition:
+	Each book category has different pricing rules:
+
+	top10: $30 for 7 days; $5 for each additional day.
+	tech: $20 for 10 days; $3 for each additional day.
+	mind: $15 for 7 days; $1.5 for each additional day.
+	What to Do:
+
+	In the printHistory() method, calculate and print the fee for each rental, along with the total amount for the customer.
+Use Case D.2: Calculate Loyalty Points in printHistory()
+	Definition:
+	To encourage customer engagement, each book category offers loyalty points:
+
+	Renting a top10 book earns 10 points.
+	Renting a tech book earns 7 points.
+	Renting a mind book earns 8 points.
+	What to Do:
+
+	In the printHistory() method, calculate and print the points earned for each rental, along with the customer’s total points.
+System Requirements Summary
+	eBook Class: Create a class that categorizes books as top10, tech, or mind. Create four example books.
+	Customer Class: Create a class to represent customers. Create four customers.
+	Rental Class: Create a class to represent rentals. Create seven rental records.
+	printHistory Method: Implement printHistory() in the Customer class to display each customer’s rental history, including:
+	Rental fees per transaction and total fee
+	Points earned per transaction and total points

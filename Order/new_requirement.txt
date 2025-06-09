@@ -1,0 +1,5 @@
+As time has passed, the system now contains tens of thousands of orders. Each customer has made multiple purchases, resulting in multiple order records.
+
+The list of sales representatives has also changed—some employees have left the company. This means that customers who were previously handled by those former employees now need their contact person information updated.
+
+Therefore, a function must be implemented to handle the reassignment of contact persons for affected customers.

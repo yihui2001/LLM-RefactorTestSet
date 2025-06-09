@@ -1,0 +1,50 @@
+class Order {
+    private int orderNo;
+    private Customer customer;
+    private Employee contactPerson;
+    private int salePrice;
+
+
+    public Order(int orderNo, Customer customer, Person contactPerson, int salePrice) {
+        this.orderNo = orderNo;
+        this.customer = customer;
+        this.contactPerson = contactPerson;
+        this.salePrice = salePrice;
+    }
+
+
+    public Customer getCustomer() { return customer; }
+    public Person getContactPerson() { return contactPerson; }
+    
+}
+
+
+class Customer {
+    private String name;
+    public Customer(String name) { this.name = name; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+}
+
+
+class Employee {
+    private String name;
+    public Employee (String name) { this.name = name; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+}
+
+
+public static void main(String[] args) {
+    List<Order> allSales = new ArrayList<>();
+
+
+    Customer amy = new Customer("Amy");
+    Employee bella = new Employee ("Bella");
+    Employee cindy = new Employee ("Cindy");
+
+
+    Order o1 = new Order(1, amy, bella, 1000);
+    allSales.add(o1);
+ 
+}

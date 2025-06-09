@@ -1,0 +1,80 @@
+public class WoodLog {
+
+    public String species;
+
+    public int storageDays;
+
+    public int grade;
+
+    public WoodLog(String species, int storageDays, int grade) {
+        this.species = species;
+        this.storageDays = storageDays;
+        this.grade = grade;
+    }
+
+    @Override
+    public String toString() {
+        return this.species + ", " + this.storageDays + ", " + this.grade;
+    }
+}
+
+class LumberMill {
+    WoodLog[] logs;
+
+    public LumberMill(WoodLog[] logs) {
+        this.logs = logs;
+    }
+
+    public void updateGrade() {
+        for (int i = 0; i < logs.length; i++) {
+            if (!logs[i].species.equals("Seasoned Oak")
+                    && !logs[i].species.equals("Event Cedar")) {
+                if (logs[i].grade > 0) {
+                    if (!logs[i].species.equals("Ancient Redwood")) {
+                        logs[i].grade = logs[i].grade - 1;
+                    }
+                }
+            } else {
+                if (logs[i].grade < 100) {
+                    logs[i].grade = logs[i].grade + 1;
+
+                    if (logs[i].species.equals("Event Cedar")) {
+                        if (logs[i].storageDays < 30) {
+                            if (logs[i].grade < 100) {
+                                logs[i].grade = logs[i].grade + 1;
+                            }
+                        }
+
+                        if (logs[i].storageDays < 10) {
+                            if (logs[i].grade < 100) {
+                                logs[i].grade = logs[i].grade + 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!logs[i].species.equals("Ancient Redwood")) {
+                logs[i].storageDays = logs[i].storageDays - 1;
+            }
+
+            if (logs[i].storageDays < 0) {
+                if (!logs[i].species.equals("Seasoned Oak")) {
+                    if (!logs[i].species.equals("Event Cedar")) {
+                        if (logs[i].grade > 0) {
+                            if (!logs[i].species.equals("Ancient Redwood")) {
+                                logs[i].grade = logs[i].grade - 1;
+                            }
+                        }
+                    } else {
+                        logs[i].grade = 0;
+                    }
+                } else {
+                    if (logs[i].grade < 100) {
+                        logs[i].grade = logs[i].grade + 1;
+                    }
+                }
+            }
+        }
+    }
+}

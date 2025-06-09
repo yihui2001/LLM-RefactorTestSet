@@ -1,0 +1,342 @@
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using Diva;
+using Newtonsoft.Json;
+using UnityEngine;
+using Debug = UnityEngine.Debug;
+
+public class LoadingCenter : MonoBehaviour
+{
+    private Dictionary<string, Type> _meshdllMap = new Dictionary<string, Type>();
+    private ServerThread _st;
+    private const string DivaIp = "0.0.0.0";
+    private const int DivaPort = 11223;
+    private Thread _serverThread;
+    private DivaAction _divaAction;
+    public LabelList Labelcollector;
+    public DefaultValue DefaultValue;
+
+    public string GetvmId(GameObject gameobj)
+    {
+        return gameobj.name;
+    }
+
+    private void StartTcp()
+    {
+        _serverThread = new Thread(_st.Run);
+        //_serverThread.IsBackground = true;
+        _serverThread.Start();
+        // Logger.Write(Logger.State.INFO, "Start TCP server.");
+    }
+
+    private void Init()
+    {
+        // Logger.Init();
+        // Logger.Write(Logger.State.INFO, "Loading center initializing...");
+        _st = new ServerThread(DivaIp, DivaPort);
+        // Logger.Write(Logger.State.INFO, "Create server thread.");
+        _divaAction = new DivaAction(_st);
+    }
+
+    private Vm RunDll(GameObject container, string sceneName, string meshName, JObject attribute, string vmId)
+    {
+        Type vmType = _meshdllMap[meshName];
+        GameObject go = new GameObject();
+        go.transform.SetParent(container.transform);
+        Vm vm = go.AddComponent(vmType) as Vm;
+        var newAttribute = DefaultValue.MergeWithDefaultValue(attribute);
+        vm.Attribute = newAttribute;
+        vm.SetAction(_divaAction);
+        vm.sceneName = sceneName;
+        DivaManager.Instance.AddVm(sceneName, vmId, vm);
+        return vm;
+    }
+
+    private string GetVmClassName(string vmTypeName)
+    {
+        string[] stringArray = vmTypeName.Split('_');
+        string[] stringResult =
+            stringArray.Select(str => str[0].ToString().ToUpper() + str.Substring(1)).ToArray();
+        string result = string.Join("", stringResult);
+
+        return result;
+    }
+
+    private void BuildGameobj(GameObject container, string sceneName, JObject objAttribute)
+    {
+        string vmType = objAttribute.Value<string>("vmType");
+        string vmId = objAttribute.Value<string>("other:vmId");
+        JToken pointer = objAttribute["reference:pointer"];
+
+        if (DivaManager.Instance.Contain(sceneName, vmId))
+        {
+            DivaManager.Instance.RemoveVm(sceneName, vmId);
+        }
+
+        // check if the pointer isn't point to null
+        print("vmType: " + vmType + ", attr: " + objAttribute);
+        // if (vmType.Contains("reference") && pointer.Type != JTokenType.Object) return;
+        Vm vm = RunDll(container, sceneName, vmType, objAttribute, vmId);
+
+        if (objAttribute["error"] != null && objAttribute.Value<bool>("error"))
+        {
+            Labelcollector.AddErrorVm(vm);
+        }
+    }
+
+    public void ParseJsonAndBuildGameobj(string sceneName, JToken jsonMessage)
+    {
+        JObject outer = jsonMessage.Value<JObject>();
+        List<string> keys = outer.Properties().Select(p => p.Name).ToList();
+
+        foreach (string k in keys)
+        {
+            print(k);
+        }
+        print(outer.GetValue("SceneData").Value<string>());
+        string sceneData = jsonMessage.Value<string>("SceneData");
+        print(sceneData);
+        JToken sceneDataToken = JToken.Parse(sceneData);
+        JArray meshAttribute = sceneDataToken.Value<JArray>("vms");
+        
+        GameObject sceneContainer = new GameObject();
+        sceneContainer.name = sceneName;
+        sceneContainer.transform.SetParent(GameObject.Find("SceneFileContainer").transform);
+        List<JObject> containerUBVMList = new List<JObject>();
+        foreach (JToken meshs in meshAttribute)
+        {
+            if (!meshs.HasValues)
+            {
+                continue;
+            }
+
+            JObject objAttribute = (JObject) meshs;
+            if (objAttribute.Value<string>("vmType").ToLower().Equals("container_ubvm"))
+            {
+                containerUBVMList.Add(objAttribute);
+                continue;
+            }
+            // Logger.Write(Logger.State.INFO, "Build ubvm: " + objAttribute.ToString());
+            BuildGameobj(sceneContainer, sceneName, objAttribute);
+        }
+        foreach(JObject vm in containerUBVMList)
+        {
+            // Logger.Write(Logger.State.INFO, "Building container_ubvm: " + vm.ToString());
+            BuildGameobj(sceneContainer, sceneName, vm);
+        }
+        if (MessageManager.Instance.isShow)
+        {
+            MessageManager.Instance.ShowMessage(MessageManager.Instance.Vms.GetComponentsInChildren<Vm>().Select(vm => vm.gameObject));
+        }
+    }
+
+    private void GetMeshDll()
+    {
+        string path = Path.Combine(Directory.GetCurrentDirectory(), "mappingnodes");
+        string[] fileNames = Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories);
+        foreach (string fileName in fileNames)
+        {
+            Debug.Log("fileName");
+            Debug.Log(fileName);
+            // Logger.Write(Logger.State.INFO, "Get mesh dll :" + fileName);
+            var dll = Assembly.LoadFile(fileName);
+            string meshName = Path.GetFileNameWithoutExtension(fileName);
+            _meshdllMap[meshName] = dll.GetType("Vm" + "." + GetVmClassName(meshName));
+        }
+    }
+
+    private void Awake()
+    {
+        Init();
+    }
+
+    void Start()
+    {
+        GetMeshDll();
+        //ParseJsonAndBuildGameobj(File.ReadAllText(@"D:\test.json"));
+        StartTcp();
+    }
+
+    private void Clearvm()
+    {
+        // Logger.Write(Logger.State.INFO, "Clear all vms");
+        Labelcollector.Clear();
+        VmTag.Cnt = 0;
+        
+        DivaManager.Instance.ClearAll();
+    }
+
+    private void Update()
+    { 
+        if (_st == null) return;
+        // TODO check if this line can be omitted
+        //        if (!_st.IsAlive()) return;
+        // Logger.Write(Logger.State.DEBUG, "Thread 2 status: " + _serverThread.ThreadState);
+        if (!_st.IsMessageAvailable()) return;
+
+        string message = _st.ReadMessage();
+        if (message == ServerThread.ClearAll)
+        {
+            // Logger.Write(Logger.State.INFO, "Received Clear_All message");
+            Clearvm();
+            MessageManager.Instance.ClearAllMessage();
+            return;
+        }
+
+        // Logger.Write(Logger.State.INFO, "Received message: " + message);
+        JToken jsonMessage = JToken.Parse(message);
+        // Debug.Assert(parsed_json["SceneData"] != null,"lose the level of SceneData");
+        string command = jsonMessage.Value<string>("Command");
+
+        if (command == "Visualize")
+        {
+            // Logger.Write(Logger.State.INFO, "Handling visualize command: " + jsonMessage.ToString());
+            Clearvm();
+            MessageManager.Instance.ClearAllMessage();
+            ParseJsonAndBuildGameobj(DivaManager.DEFAULT_SCENE_NAME, jsonMessage);
+            Labelcollector.UpdateData();
+            LayoutManager.Instance.ApplyDefaultLayout();
+            LayoutManager.Instance.SettingLayoutVariable(jsonMessage);
+
+            if (Labelcollector.ContainLabel(GoldenCaseDialog.CASE_B_LABEL_NAME))
+            {
+                LinkedList<Vm> vmToAddLabel = new LinkedList<Vm>();
+                foreach (Vm vm in DivaManager.Instance.GetVmDictionary(DivaManager.DEFAULT_SCENE_NAME).Values)
+                {
+                    vmToAddLabel.AddLast(vm);
+
+                }
+                Labelcollector.AddLabel(GoldenCaseDialog.CASE_A_LABEL_NAME, vmToAddLabel);
+            }
+        }
+        else if (command == "Update")
+        {
+            // Logger.Write(Logger.State.INFO, "Handling update command: " + jsonMessage.ToString());
+            UpdateVm(DivaManager.DEFAULT_SCENE_NAME, jsonMessage, false, true);
+            LayoutManager.Instance.SettingLayoutVariable(jsonMessage);
+        }
+        else if (command == "Clear")
+        {
+            // Logger.Write(Logger.State.INFO, "Handling clear command: " + jsonMessage.ToString());
+            Clearvm();
+            MessageManager.Instance.ClearAllMessage();
+        }
+        else if (command == "Info")
+        {
+            // Logger.Write(Logger.State.INFO, "Handling info command: " + jsonMessage.ToString());
+            InfoManager.Instance.ShowInfo(jsonMessage);
+        }
+        else if (command == "Label")
+        {
+            // Logger.Write(Logger.State.INFO, "Handling label command: " + jsonMessage.ToString());
+            var objectIdList = jsonMessage.Value<JArray>("ObjectList").ToObject<List<string>>();
+            LinkedList<Vm> vms = new LinkedList<Vm>();
+            foreach(string vmId in objectIdList)
+            {
+                // use DEFAULT_SCENE_NAME because send from scene file can't receive data from QT xDIVA
+               vms.AddLast(DivaManager.Instance.GetVm(DivaManager.DEFAULT_SCENE_NAME, vmId));
+            }
+            Labelcollector.AddLabel(jsonMessage.Value<string>("Name"), vms);
+        }
+        else if (command == "Golden")
+        {
+            // Logger.Write(Logger.State.INFO, "Handling golden command: " + jsonMessage.ToString());
+            ParseJsonAndBuildGameobj("GoldenCaseB", jsonMessage);
+            //Labelcollector.UpdateData();
+            //LayoutManager.Instance.ApplyDefaultLayout();
+            //LayoutManager.Instance.SettingLayoutVariable(jsonMessage);
+
+            /* Create GoldenCase Label */
+            if (!Labelcollector.ContainLabel(GoldenCaseDialog.CASE_A_LABEL_NAME) || !Labelcollector.ContainLabel(GoldenCaseDialog.CASE_B_LABEL_NAME))
+            {
+                LinkedList<Vm> vmToAddLabel = new LinkedList<Vm>();
+                foreach (Vm vm in DivaManager.Instance.GetVmDictionary(GoldenCaseDialog.CASE_B_LABEL_NAME).Values)
+                {
+                    vmToAddLabel.AddLast(vm);
+                }
+                Labelcollector.AddLabel(GoldenCaseDialog.CASE_B_LABEL_NAME, vmToAddLabel);
+                vmToAddLabel = new LinkedList<Vm>();
+                try
+                {
+                    foreach (Vm vm in DivaManager.Instance.GetVmDictionary(DivaManager.DEFAULT_SCENE_NAME).Values)
+                    {
+                        vmToAddLabel.AddLast(vm);
+                    }
+                    Labelcollector.AddLabel(GoldenCaseDialog.CASE_A_LABEL_NAME, vmToAddLabel);
+                } catch (Exception e)
+                {
+                    Debug.Log("GoldenCaseA not load.");
+                }
+                
+            }
+        }
+    }
+
+    public void CreateGameObjectFromCompare(string compareName, JArray vms)
+    {
+        GameObject sceneContainer = new GameObject();
+        sceneContainer.name = compareName;
+        sceneContainer.transform.SetParent(GameObject.Find("SceneFileContainer").transform);
+        foreach (JToken meshs in vms)
+        {
+            if (!meshs.HasValues)
+            {
+                continue;
+            }
+
+            JObject objAttribute = (JObject)meshs;
+            BuildGameobj(sceneContainer, compareName, objAttribute);
+        }
+
+        LinkedList<Vm> vmToAddLabel = new LinkedList<Vm>();
+        foreach (Vm vm in DivaManager.Instance.GetVmDictionary(compareName).Values)
+        {
+            vmToAddLabel.AddLast(vm);
+        }
+        Labelcollector.AddLabel(compareName, vmToAddLabel);
+    }
+
+    public void UpdateVm(string sceneName, JToken jsonMessage, bool update, bool updateChildren)
+    {
+        ParseJsonAndBuildGameobj(DivaManager.DEFAULT_SCENE_NAME, jsonMessage);
+ 
+    }
+
+    private void OnApplicationQuit()
+    {
+        if (_st != null)
+        {
+            _st.StopListening();
+        }
+        // Logger.Write(Logger.State.INFO, "Application quit");
+    }
+
+    public JObject GetSceneDataJson(string sceneName)
+    {
+        JArray array = new JArray();
+        foreach (Vm vm in DivaManager.Instance.GetVmDictionary(sceneName).Values)
+        {
+            array.Add(vm.Attribute);
+        }
+        
+        JObject jObject = new JObject();
+        jObject["vms"] = array;
+
+        return jObject;
+    }
+
+    public JArray GetSceneDataJsonArray(string sceneName)
+    {
+        JArray array = new JArray();
+        foreach (Vm vm in DivaManager.Instance.GetVmDictionary(sceneName).Values)
+        {
+            array.Add(vm.Attribute);
+        }
+        return array;
+    }
+}

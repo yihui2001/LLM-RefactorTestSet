@@ -1,0 +1,29 @@
+Welcome to Old Oak Lumber Mill. We are a small, handcrafted lumber shop located on the edge of a bustling city, run by a friendly woodworker named Allison. We only trade in the highest quality wood. However, our wood degrades in Grade over time as it stays in storage.
+
+We have an automated system in place that updates our lumber inventory at the end of each day. It was developed by a no-nonsense developer named Leeroy, who has since left to chop trees deep in the forest. Your task is to add support for a new category of wood.
+
+Here’s how the current system works:
+
+Every piece of log (wood) has a StorageDays value, which indicates how many days remain before it must be used or sold.
+
+Every log also has a Grade value, which indicates its quality.
+
+At the end of each day, the system decreases both StorageDays and Grade for each log.
+
+Once the storage period expires (StorageDays < 0), the Grade of the log degrades twice as fast.
+
+The Grade of a log is never negative.
+
+Seasoned Oak is a special type of wood that actually improves in Grade the longer it ages.
+
+The Grade of any log can never exceed 100.
+
+Ancient Redwood, being a legendary wood, never needs to be sold and never degrades in Grade.
+
+Event Cedar is a rare wood used for special events. Its Grade increases as the event approaches:
+
+Grade increases by 2 when there are 30 days or fewer
+
+Grade increases by 3 when there are 10 days or fewer
+
+Grade drops to 0 after the event (when StorageDays < 0)

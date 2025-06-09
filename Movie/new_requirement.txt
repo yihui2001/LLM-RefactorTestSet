@@ -1,0 +1,1 @@
+The store is introducing a promotional category for "Classics" movies, and you are required to add this category to the existing system. For all movies classified as "Classics," the rental price will be set at 1 unit per day. Additionally, customers who rent movies from the "Classics" category will earn 3 reward points per rental.
