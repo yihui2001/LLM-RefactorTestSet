@@ -20,52 +20,52 @@ This repository contains a dataset of six representative software architecture d
 
 ### Movie Case
 
-Source: Refactoring textbook (e.g., Refactoring: Improving the Design of Existing Code, Chapter 1).
+- Source: Refactoring textbook (e.g., Refactoring: Improving the Design of Existing Code, Chapter 1).
 
-Defect: A single method uses a switch-case statement to determine tape types, mixing fee and point calculation logic. This violates the Open-Closed Principle (OCP).
+- Defect: A single method uses a switch-case statement to determine tape types, mixing fee and point calculation logic. This violates the Open-Closed Principle (OCP).
 
-Standard Refactoring: Apply the Strategy pattern to encapsulate different pricing strategies into separate classes. When adding a new tape type, only a new strategy class needs to be added without modifying existing logic.
+- Standard Refactoring: Apply the Strategy pattern to encapsulate different pricing strategies into separate classes. When adding a new tape type, only a new strategy class needs to be added without modifying existing logic.
 
 ### E-Book Case
 
-Source: A semantic rewrite of the Movie Case.
+- Source: A semantic rewrite of the Movie Case.
 
-Purpose: To prevent language models from leveraging memorized knowledge from training data (which may include the original Movie Case), and instead evaluate whether the model can reason structurally and semantically.
+- Purpose: To prevent language models from leveraging memorized knowledge from training data (which may include the original Movie Case), and instead evaluate whether the model can reason structurally and semantically.
 
-Implementation: Maintains the same structural logic as the original, but renames variables, class names, and descriptive terms to obscure the direct connection to the textbook example.
+- Implementation: Maintains the same structural logic as the original, but renames variables, class names, and descriptive terms to obscure the direct connection to the textbook example.
 
 ### GildedRose Case
 
-Source: Publicly available store management example (e.g., GildedRose kata).
+- Source: Publicly available store management example (e.g., GildedRose kata).
 
-Defect: Contains deeply nested if-else statements for updating item quality and sell-in values based on item name. The structure is complex and hard to read, making extensions difficult.
+- Defect: Contains deeply nested if-else statements for updating item quality and sell-in values based on item name. The structure is complex and hard to read, making extensions difficult.
 
-Refactoring: Introduce the Strategy pattern (or a similar approach) to encapsulate update logic for each item type, then dynamically compose them into the item class to improve extensibility.
+- Refactoring: Introduce the Strategy pattern (or a similar approach) to encapsulate update logic for each item type, then dynamically compose them into the item class to improve extensibility.
 
 ### Wood Case
 
-Source: A semantic rewrite of the GildedRose Case.
+- Source: A semantic rewrite of the GildedRose Case.
 
-Purpose: Similar to the E-Book Case, this version prevents the model from relying on memory and encourages structural and pattern-based reasoning.
+- Purpose: Similar to the E-Book Case, this version prevents the model from relying on memory and encourages structural and pattern-based reasoning.
 
-Implementation: Same structure as the GildedRose Case, but all identifiers and descriptions are semantically altered.
+- Implementation: Same structure as the GildedRose Case, but all identifiers and descriptions are semantically altered.
 
 ### Order Case
 
-Source: An original case inspired by database normalization concepts.
+- Source: An original case inspired by database normalization concepts.
 
-Context: Simulates an order management system involving three classes: Customer, Order, and Employee. Each order is associated with a customer and a responsible employee.
+- Context: Simulates an order management system involving three classes: Customer, Order, and Employee. Each order is associated with a customer and a responsible employee.
 
-Defect: When an employee leaves, all related orders must be traversed and updated manually. This design is inefficient and lacks flexibility.
+- Defect: When an employee leaves, all related orders must be traversed and updated manually. This design is inefficient and lacks flexibility.
 
-Refactoring Idea: Consider centralizing the management of customer-employee relationships (e.g., through a dedicated relation management class), or adopt a more flexible data association model to avoid full traversal updates.
+- Refactoring Idea: Consider centralizing the management of customer-employee relationships (e.g., through a dedicated relation management class), or adopt a more flexible data association model to avoid full traversal updates.
 
 ### Scene Case
 
-Source: Snippet from a Unity project developed in the lab.
+- Source: Snippet from a Unity project developed in the lab.
 
-Context: A single class handles multiple responsibilities with complex command logic and lacks modularity. The extension task is to support a "local object import" feature.
+- Context: A single class handles multiple responsibilities with complex command logic and lacks modularity. The extension task is to support a "local object import" feature.
 
-Defect: Responsibilities are overly concentrated, making the system hard to extend or maintain.
+- Defect: Responsibilities are overly concentrated, making the system hard to extend or maintain.
 
-Refactoring Suggestion: Introduce the Command pattern to modularize command dispatch logic, and apply the Single Responsibility Principle (SRP) to split classes and improve maintainability and extensibility.
+- Refactoring Suggestion: Introduce the Command pattern to modularize command dispatch logic, and apply the Single Responsibility Principle (SRP) to split classes and improve maintainability and extensibility.
